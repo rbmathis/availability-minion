@@ -11,7 +11,6 @@
 using System;
 using System.Reflection;
 
-[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("dotnet-Availability_Watcher-22D09421-37ED-4667-8E28-DE281B702024")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("Availability-Watcher")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]

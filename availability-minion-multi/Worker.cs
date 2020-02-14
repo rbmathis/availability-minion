@@ -10,7 +10,7 @@ using System.Net.Http;
 using Microsoft.ApplicationInsights.DataContracts;
 using System.IO;
 using System.Collections.Generic;
-
+using availability_minion_multi;
 
 namespace availabilityMinionMulti
 {
@@ -28,29 +28,11 @@ namespace availabilityMinionMulti
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            string configPath = System.IO.Directory.GetCurrentDirectory();
-            List<string>testAddressList = new List<string>();
-            List<string> ikeys = new List<string>();
-         
+            ConfigTestHelper helper = new ConfigTestHelper(_logger, "");
 
-            if (File.Exists($"{configPath}/config.txt"))
-            {
-                configFile = File.ReadAllLines($"{configPath}/config.txt");
-            }
+            foreach (TestConfig config in helper.Configs)
+                await TestRunner.RunAvailabilityTestFromConfig(_logger, config);
 
-            else
-            {
-                configFile = File.ReadAllLines($"C:/Program Files/Minion/config.txt");
-            }
-            
-            foreach (string line in configFile)
-            {
-                var textProcessing = line.Replace(" ", String.Empty);
-                var items = textProcessing.Split(',');
-
-                testAddressList.Add(items[0]);
-                ikeys.Add(items[1]);
-            }
 
             TelemetryConfiguration configuration = TelemetryConfiguration.CreateDefault();
             var telemetryClient = new TelemetryClient(configuration);

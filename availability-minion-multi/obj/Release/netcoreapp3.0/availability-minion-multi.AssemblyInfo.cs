@@ -11,7 +11,6 @@
 using System;
 using System.Reflection;
 
-[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("dotnet-availability_minion_multi-6E60E20B-31F6-4F6F-A044-783D7852D001")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("availability-minion-multi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]

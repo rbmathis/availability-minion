@@ -4,46 +4,59 @@ using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace availability_minion_multi
 {
-	public class TestRunner
+	public class TestRunner: IDisposable
 	{
-		//singleton HttpClient
-		private static readonly HttpClient client = new HttpClient();
+		
+		private HttpClient client;
+		private TelemetryConfiguration telemetryConfiguration;
+		private TelemetryClient telemetryClient;
+		private ILogger log;
 
-		//here's the magic - AppInsights telemetry client
-		private static TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration();
-		private static TelemetryClient telemetryClient = new TelemetryClient(telemetryConfiguration);
+		public TestRunner(ILogger log, AvailabilityTest test)
+		{
+			this.log = log;
+
+			//HttpClient setup
+			this.client = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+			this.client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0; MinionBot)");
+
+			//Telemetry client setup
+			this.telemetryConfiguration = new TelemetryConfiguration();
+			this.telemetryClient = new TelemetryClient(telemetryConfiguration);
+		}
 
 
 		/// <summary>
 		/// Executes web tests for the Config
 		/// </summary>
 		/// <param name="log"></param>
-		/// <param name="config"></param>
+		/// <param name="test"></param>
 		/// <returns></returns>
-		public static async Task RunAvailabilityTestFromConfig(ILogger log, TestConfig config)
+		public async Task RunAvailabilityTest(ILogger log, AvailabilityTest test)
 		{
 			// If your resource is in a region like Azure Government or Azure China, change the endpoint address accordingly.
 			// Visit https://docs.microsoft.com/azure/azure-monitor/app/custom-endpoints#regions-that-require-endpoint-modification for more details.
 			string EndpointAddress = "https://dc.services.visualstudio.com/v2/track";
-			telemetryConfiguration.InstrumentationKey = config.APPINSIGHTS_INSTRUMENTATIONKEY;
+			telemetryConfiguration.InstrumentationKey = test.APPINSIGHTS_INSTRUMENTATIONKEY;
 			telemetryConfiguration.TelemetryChannel = new InMemoryChannel { EndpointAddress = EndpointAddress };
 
-			foreach (Test test in config.Tests)
+			foreach (EndPoint e in test.Endpoints)
 			{
-				log.LogInformation($"Beginning test {test.TestName}");
-				await RunAvailbiltyTestAsync(log, config, test, telemetryClient);
+				await RunAvailbiltyTestAsync(log, client, test, e, telemetryClient).ConfigureAwait(false);
 			}
 
-			log.LogInformation($"Successfully executed tests for {config.FileName}");
+			client = null;
+			telemetryConfiguration = null;
+			telemetryClient = null;
+
+			log.LogInformation($"Completed tests for {test.ApplicationName}");
 		}
 
 		/// <summary>
@@ -53,46 +66,72 @@ namespace availability_minion_multi
 		/// <param name="testName"></param>
 		/// <param name="uri"></param>
 		/// <returns></returns>
-		public async static Task RunAvailbiltyTestAsync(ILogger log, TestConfig config, Test test, TelemetryClient telemetryClient)
+		private async static Task RunAvailbiltyTestAsync(ILogger log, HttpClient client, AvailabilityTest test, EndPoint endpoint, TelemetryClient telemetryClient)
 		{
-			if (String.IsNullOrEmpty(test.TestName))
+			if (null == test)
 			{
-				Exception ex = new ArgumentOutOfRangeException("TestName", "No 'testName' was provided");
+				Exception ex = new ArgumentOutOfRangeException("test", "The 'test' object is null.");
+				log.LogError($"Invalid Test Settings : {ex.Message}");
+				throw ex;
+			}
+			if (null == telemetryClient)
+			{
+				Exception ex = new ArgumentOutOfRangeException("telemetryClient", "The 'telemetryClient' object is null.");
+				log.LogError($"Invalid Test Settings : {ex.Message}");
+				throw ex;
+			}
+			if (null == endpoint)
+			{
+				Exception ex = new ArgumentOutOfRangeException("telemetryClient", "The 'telemetryClient' object is null.");
+				log.LogError($"Invalid Test Settings : {ex.Message}");
+				throw ex;
+			}
+
+			if (String.IsNullOrEmpty(endpoint.Name))
+			{
+				Exception ex = new ArgumentOutOfRangeException("Name", "No 'Name' was provided in the config.");
 				log.LogError($"Invalid Test Settings : {ex.Message}");
 				throw ex;
 			}
 
 			Uri goodUri = null;
-			Uri.TryCreate(test.PageUrl, UriKind.Absolute, out goodUri);
+			Uri.TryCreate(endpoint.PageUrl, UriKind.Absolute, out goodUri);
 			if (null == goodUri)
 			{
-				Exception ex = new ArgumentOutOfRangeException("uri", $"The provided uri {test.PageUrl} is invalid.");
+				Exception ex = new ArgumentOutOfRangeException("uri", $"The provided uri {endpoint.PageUrl} is invalid.");
 				log.LogError($"Invalid Test Settings : {ex.Message}");
 				throw ex;
 			}
 
-			// REGION_NAME is a default environment variable that comes with App Service
-			// It's also set in the local.settings.json for testing
-			string location = config.Region;
-
-			log.LogInformation($"Executing availability test run for {test.PageUrl} at: {DateTime.Now}");
+			//setup the telemetry
 			string operationId = Guid.NewGuid().ToString("N");
-
 			var availability = new AvailabilityTelemetry
 			{
 				Id = operationId,
-				Name = $"{config.ApplicationName} : {test.TestName}",
-				RunLocation = location,
+				Name = $"{test.ApplicationName} : {endpoint.Name}",
+				RunLocation = System.Environment.MachineName,
 				Success = false
 			};
 
+			//start the timer
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
+			//try it
 			try
 			{
-				await ExecuteWebGet(log, client, goodUri);
-				availability.Success = true;
+				await ExecuteWebGet(log, availability, client, goodUri).ConfigureAwait(false);
+			}
+			catch (HttpRequestException ex)
+			{
+				//grab the inner exception if the Request fails outright
+				availability.Message = ex.InnerException.Message;
+
+				var exceptionTelemetry = new ExceptionTelemetry(ex);
+				exceptionTelemetry.Context.Operation.Id = operationId;
+				exceptionTelemetry.Properties.Add("TestName", endpoint.Name);
+				exceptionTelemetry.Properties.Add("TestLocation", System.Environment.MachineName);
+				telemetryClient.TrackException(exceptionTelemetry);
 			}
 			catch (Exception ex)
 			{
@@ -100,8 +139,8 @@ namespace availability_minion_multi
 
 				var exceptionTelemetry = new ExceptionTelemetry(ex);
 				exceptionTelemetry.Context.Operation.Id = operationId;
-				exceptionTelemetry.Properties.Add("TestName", test.TestName);
-				exceptionTelemetry.Properties.Add("TestLocation", location);
+				exceptionTelemetry.Properties.Add("TestName", endpoint.Name);
+				exceptionTelemetry.Properties.Add("TestLocation", System.Environment.MachineName);
 				telemetryClient.TrackException(exceptionTelemetry);
 			}
 			finally
@@ -122,25 +161,64 @@ namespace availability_minion_multi
 		/// <param name="log"></param>
 		/// <param name="uri"></param>
 		/// <returns></returns>
-		private async static Task ExecuteWebGet(ILogger log, HttpClient client, Uri uri)
+		private async static Task ExecuteWebGet(ILogger log, AvailabilityTelemetry telemetry, HttpClient client, Uri uri)
 		{
 			client.DefaultRequestHeaders.Accept.Clear();
 			client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
 			client.DefaultRequestHeaders.Add("User-Agent", ".NET Foundation Repository Reporter");
 
-			log.LogInformation($"Checking {uri}");
-
-			var stringTask = client.GetStringAsync(uri);
-			var res = stringTask.Result;
-
-			if (stringTask.IsCompletedSuccessfully)
-				log.LogInformation("success");
-			else
+			using (HttpRequestMessage request = new HttpRequestMessage())
 			{
-				log.LogInformation("fail");
-				throw new Exception($"Availability Test failed while checking {uri}.");
-			}
+				request.RequestUri = uri;
+				request.Method = HttpMethod.Get;
+				request.Headers.Add("SyntheticTest-RunId", telemetry.Id);
+				request.Headers.Add("Request-Id", "|" + telemetry.Id);
+
+				using (var httpResponse = await client.SendAsync(request).ConfigureAwait(false))
+				{
+					// add test results to availability telemetry property
+					telemetry.Properties.Add("HttpResponseStatusCode", value: Convert.ToInt32(httpResponse.StatusCode).ToString());
+
+					if (httpResponse.IsSuccessStatusCode)
+					{
+						telemetry.Success = true;
+						telemetry.Message = $"Test succeeded with response: {httpResponse.StatusCode}";
+						log.LogTrace($"[Verbose]: {telemetry.Message}");
+					}
+					else if (!httpResponse.IsSuccessStatusCode)
+					{
+						telemetry.Message = $"Test failed with response: {httpResponse.StatusCode}";
+						log.LogWarning($"[Warning]: {telemetry.Message}");
+					}
+				}
+			};
 
 		}
+
+		#region IDisposable Support
+		private bool disposedValue = false; // To detect redundant calls
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!disposedValue)
+			{
+				if (disposing)
+				{
+					client = null;
+					telemetryClient = null;
+					telemetryConfiguration=null;
+				}
+
+				disposedValue = true;
+			}
+		}
+
+		// This code added to correctly implement the disposable pattern.
+		public void Dispose()
+		{
+			// Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+			Dispose(true);
+		}
+		#endregion
 	}
 }

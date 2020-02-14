@@ -7,20 +7,21 @@ namespace availability_minion_multi
 	/// <summary>
 	/// Class to hold config from JSON files
 	/// </summary>
-	public class TestConfig
+	public class AvailabilityTest
 	{
 		public string FileName { get; set; }
 		public string APPINSIGHTS_INSTRUMENTATIONKEY { get; set; }
 		public string ApplicationName { get; set; }
-		public string Region { get; set; }
-		public Test[] Tests { get; set; }
+		public int IntervalInSeconds { get; set; }
+		public EndPoint[] Endpoints { get; set; }
+		public DateTime LastExecuted { get; set; } = DateTime.MinValue;
 	}
 	/// <summary>
 	/// POCO for Tests
 	/// </summary>
-	public class Test
+	public class EndPoint
 	{
-		public string TestName { get; set; }
+		public string Name { get; set; }
 		public string PageUrl { get; set; }
 	}
 }

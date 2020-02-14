@@ -1,0 +1,15 @@
+{
+	"APPINSIGHTS_INSTRUMENTATIONKEY": "8845f024-b5f3-4ad2-8031-08dc2b1bd653",
+	"ApplicationName": "Motorcycles",
+	"IntervalInSeconds": "15",
+	"Endpoints": [
+		{
+			"Name": "Honda",
+			"PageUrl": "https://powersports.honda.com/"
+		},
+		{
+			"Name": "Indian",
+			"PageUrl": "https://www.indianmotorcycle.com/"
+		}
+	]
+}

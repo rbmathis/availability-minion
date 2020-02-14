@@ -8,16 +8,29 @@ using System.Text;
 
 namespace availability_minion_multi
 {
-	public class ConfigTestHelper
+	public class AvailabilityTestHelper
 	{
+		/// <summary>
+		/// Path to the config files (files named "Appxxxx.json")
+		/// </summary>
+		public string ConfigFilePath { get; private set; }
 
-		public string ConfigFilePath { get; set; }
-		public List<TestConfig> Configs { get; set; }
+		/// <summary>
+		/// List of AvailabilityTests that contain the test settings for each app
+		/// </summary>
+		public List<AvailabilityTest> Tests { get; private set; } = new List<AvailabilityTest>();
 
-		public ConfigTestHelper(ILogger log, string path)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="log"></param>
+		/// <param name="path"></param>
+		public AvailabilityTestHelper(ILogger log, string path)
 		{
-			if (String.IsNullOrEmpty(path)) ConfigFilePath = System.IO.Directory.GetCurrentDirectory();
-			else ConfigFilePath = path;
+			if (String.IsNullOrEmpty(path))
+				throw new ArgumentNullException("path", "There was no value provided for 'path'");
+
+			ConfigFilePath = path;
 
 			EnsureConfiguration(log);
 
@@ -30,13 +43,22 @@ namespace availability_minion_multi
 		/// <returns>Deserialized config from json files found in the current directory</returns>
 		private void EnsureConfiguration(ILogger log)
 		{
-			//load list of config files
-			string[] files = FindConfigFiles(log);
+			try
+			{
+				//load list of config files
+				string[] files = FindConfigFiles(log);
 
-			//load json object from config files
-			LoadConfigFromFiles(log, files);
+				//load each config file
+				files.ToList().ForEach(o => Tests.Add(LoadConfigFromFile(log, o)));
 
-			log.LogInformation($"Successfully loaded configuration files from {ConfigFilePath}");
+				log.LogInformation($"Successfully loaded configuration files from {ConfigFilePath}");
+			}
+			catch (Exception ex)
+			{
+				log.LogError($"No config files found at {ConfigFilePath}");
+				throw new FileNotFoundException($"No config files found at {ConfigFilePath}", ConfigFilePath);
+			}
+	
 		}
 
 		/// <summary>
@@ -45,12 +67,12 @@ namespace availability_minion_multi
 		/// <param name="log"></param>
 		/// <param name="filename"></param>
 		/// <returns>Hydrated Config object from json</returns>
-		private TestConfig LoadConfigFromFile(ILogger log, string filename)
+		private static AvailabilityTest LoadConfigFromFile(ILogger log, string filename)
 		{
-			TestConfig config;
+			AvailabilityTest config;
 			try
 			{
-				config = (TestConfig)JsonConvert.DeserializeObject(File.ReadAllText(filename), typeof(TestConfig));
+				config = (AvailabilityTest)JsonConvert.DeserializeObject(File.ReadAllText(filename), typeof(AvailabilityTest));
 				config.FileName = filename;
 			}
 			catch (Exception ex)
@@ -64,21 +86,6 @@ namespace availability_minion_multi
 		}
 
 
-		/// <summary>
-		/// Load the Config objects from a list of files
-		/// </summary>
-		/// <param name="log"></param>
-		/// <param name="files"></param>
-		/// <returns>List of Config hydrated from json</returns>
-		private void LoadConfigFromFiles(ILogger log, string[] files)
-		{
-			//load each config file
-			files.ToList().ForEach(o => Configs.Add(LoadConfigFromFile(log, o)));
-
-		}
-
-
-
 
 		/// <summary>
 		/// Check the current running directory for files named "Appxxxx.json"
@@ -88,14 +95,14 @@ namespace availability_minion_multi
 		private string[] FindConfigFiles(ILogger log)
 		{
 			//check for config files
-			var files = Directory.GetFiles(this.ConfigFilePath, "App*.json");
-			if (files.Count() == 0)
+			var files = Directory.GetFiles(this.ConfigFilePath, "ApplicationTest*.json");
+			if (files.Length == 0)
 			{
 				log.LogError("There are no configuration files present in the current directory");
 				throw new FileNotFoundException("There are no configuration files present in the current directory");
 			}
 
-			log.LogInformation($"Found {files.Count()} configuration files.");
+			log.LogInformation($"Found {files.Length} configuration files.");
 			return files;
 		}
 	}

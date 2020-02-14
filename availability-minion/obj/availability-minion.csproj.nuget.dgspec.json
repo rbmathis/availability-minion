@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Administrator\\source\\repos\\availability-minion\\availability-minion.csproj": {}
+    "C:\\Users\\hobob\\Source\\Repos\\availability-minion\\availability-minion\\availability-minion.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Administrator\\source\\repos\\availability-minion\\availability-minion.csproj": {
+    "C:\\Users\\hobob\\Source\\Repos\\availability-minion\\availability-minion\\availability-minion.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Administrator\\source\\repos\\availability-minion\\availability-minion.csproj",
+        "projectUniqueName": "C:\\Users\\hobob\\Source\\Repos\\availability-minion\\availability-minion\\availability-minion.csproj",
         "projectName": "availability-minion",
-        "projectPath": "C:\\Users\\Administrator\\source\\repos\\availability-minion\\availability-minion.csproj",
-        "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Administrator\\source\\repos\\availability-minion\\obj\\",
+        "projectPath": "C:\\Users\\hobob\\Source\\Repos\\availability-minion\\availability-minion\\availability-minion.csproj",
+        "packagesPath": "C:\\Users\\hobob\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hobob\\Source\\Repos\\availability-minion\\availability-minion\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\hobob\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -25,6 +25,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Users\\hobob\\.dotnet\\NuGetFallbackFolder": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -64,12 +65,30 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[3.0.1, 3.0.1]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[3.0.2, 3.0.2]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[3.0.0, 3.0.0]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[3.0.0, 3.0.0]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.0.100\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.101\\RuntimeIdentifierGraph.json"
         }
       }
     }

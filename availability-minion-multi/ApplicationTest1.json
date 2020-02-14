@@ -1,0 +1,15 @@
+{
+	"APPINSIGHTS_INSTRUMENTATIONKEY": "98f4733d-895d-44f3-964a-05fba6024c2c",
+	"ApplicationName": "Cars",
+	"IntervalInSeconds": "120",
+	"Endpoints": [
+		{
+			"Name": "Cars",
+			"PageUrl": "https://cars.com"
+		},
+		{
+			"Name": "Autotrader",
+			"PageUrl": "https://autotrader.com"
+		}
+	]
+}

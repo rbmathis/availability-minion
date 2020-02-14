@@ -1,20 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\rmathis\\Source\\Repos\\availability-minion\\availability-minion-multi\\availability-minion-multi.csproj": {}
+    "C:\\Users\\hobob\\Source\\Repos\\availability-minion\\availability-minion-multi\\availability-minion-multi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\rmathis\\Source\\Repos\\availability-minion\\availability-minion-multi\\availability-minion-multi.csproj": {
+    "C:\\Users\\hobob\\Source\\Repos\\availability-minion\\availability-minion-multi\\availability-minion-multi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\rmathis\\Source\\Repos\\availability-minion\\availability-minion-multi\\availability-minion-multi.csproj",
+        "projectUniqueName": "C:\\Users\\hobob\\Source\\Repos\\availability-minion\\availability-minion-multi\\availability-minion-multi.csproj",
         "projectName": "availability-minion-multi",
-        "projectPath": "C:\\Users\\rmathis\\Source\\Repos\\availability-minion\\availability-minion-multi\\availability-minion-multi.csproj",
-        "packagesPath": "C:\\Users\\rmathis\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\rmathis\\Source\\Repos\\availability-minion\\availability-minion-multi\\obj\\",
+        "projectPath": "C:\\Users\\hobob\\Source\\Repos\\availability-minion\\availability-minion-multi\\availability-minion-multi.csproj",
+        "packagesPath": "C:\\Users\\hobob\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hobob\\Source\\Repos\\availability-minion\\availability-minion-multi\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
         "configFilePaths": [
-          "C:\\Users\\rmathis\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\hobob\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,6 +25,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Users\\hobob\\.dotnet\\NuGetFallbackFolder": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -41,6 +45,16 @@
             "Microsoft.ApplicationInsights": {
               "target": "Package",
               "version": "[2.12.0, )"
+            },
+            "Microsoft.AspNetCore.Http.Abstractions": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
+            "Microsoft.CodeAnalysis.FxCopAnalyzers": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.9.8, )"
             },
             "Microsoft.Extensions.Hosting": {
               "target": "Package",

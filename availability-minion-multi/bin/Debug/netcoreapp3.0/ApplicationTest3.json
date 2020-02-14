@@ -1,0 +1,23 @@
+{
+	"APPINSIGHTS_INSTRUMENTATIONKEY": "8845f024-b5f3-4ad2-8031-08dc2b1bd653",
+	"ApplicationName": "Microsoft",
+	"IntervalInSeconds": "75",
+	"Endpoints": [
+		{
+			"Name": "Home Page",
+			"PageUrl": "https://microsoft.com"
+		},
+		{
+			"Name": "Docs",
+			"PageUrl": "https://docs.microsoft.com"
+		},
+		{
+			"Name": "Bing",
+			"PageUrl": "https://bing.com"
+		},
+		{
+			"Name": "Outlook",
+			"PageUrl": "https://outlook.com"
+		}
+	]
+}
